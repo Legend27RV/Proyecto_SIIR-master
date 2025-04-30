@@ -1,0 +1,62 @@
+﻿@model SIIR.Models.Coach
+
+@{
+    ViewData["Title"] = "Crear Coach";
+}
+
+<h2 class="display-2">Dar de alta nuevo Equipo</h2>
+
+<form method="POST" asp-action="Create">
+    <div class="rows px-2 offset-1 border">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="col-10 offset-1 mt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Name"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Name" class="form-control" placeholder="Ingresa el Nombre del Coach"/>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="LastName"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="LastName" class="form-control" placeholder="Ingresa el Apellido Paterno" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="SecondLastName"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="SecondLastName" class="form-control" placeholder="Ingresa el Apellido Materno" />
+                    <span asp-validation-for="SecondLastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row mt-2">
+                <div class="col-4">
+                    <label asp-for="ImageUrl">Imagen del Coach</label>
+                </div>
+                <div class="col-8">
+                    <input type="file" class="form-control" name="archivos" id="subidaArchivo" />
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-check-group-row">
+                <div class="col-8">
+                    <partial name="_VistaCrearVolver"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>

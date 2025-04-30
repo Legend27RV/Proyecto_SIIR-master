@@ -1,0 +1,217 @@
+﻿@model SIIR.Models.ViewModels.RepresentativeVM
+@{
+    ViewData["Title"] = "Editar Grupo Representativo";
+}
+<br />
+<br />
+<h2 class="text-center mn-3">Editar un grupo representativo</h2>
+<form id="representative-form" method="POST" asp-action="Edit">
+    <div class="row px-2 mx-3 border rounded-2">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Representative.Id" />
+        <div class="col-10 offset-1 mt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Representative.Name"></label>
+                </div>
+                <div class="col-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <input asp-for="Representative.Name" class="form-control" placeholder="Ingresa el nombre del grupo representativo" />
+                    </div>
+                    <span asp-validation-for="Representative.Name" class="text-danger"></span>
+                </div>
+            </div>
+            <br />
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Representative.Category"></label>
+                </div>
+                <div class="col-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-layer-group"></i>
+                        </span>
+                        <select asp-for="Representative.Category" class="form-select">
+                            <option value="">Seleccione una opción</option>
+                            <option value="Deportivo">Deportivo</option>
+                            <option value="Cultural">Cultural</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="Representative.Category" class="text-danger"></span>
+                </div>
+            </div>
+            <br />
+            <!-- Uniformes asociados -->
+            <div id="uniformsContainer">
+                @{
+                    var index = 0;
+                    // Mostrar los uniformes guardados
+                    if (Model.SelectedUniformCatalogIds != null)
+                    {
+                        foreach (var uniformCatalogId in Model.SelectedUniformCatalogIds)
+                        {
+                            <div class="form-group row mt-2 uniform-item">
+                                <div class="col-4">
+                                    <label for="UniformCatalog">Uniforme</label>
+                                </div>
+                                <div class="col-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tshirt"></i>
+                                        </span>
+                                        <select name="SelectedUniformCatalogIds[@index]" class="form-select" required data-msg-required="Por favor selecciona un uniforme.">
+                                            <option value="">Selecciona una prenda:</option>
+                                            @foreach (var item in Model.UniformCatalogList)
+                                            {
+                                                <!option value="@item.Value" @(item.Value == uniformCatalogId.ToString() ? "selected" : "")>@item.Text</!option>
+                                            }
+                                        </select>
+                                        <span class="input-group-text">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                    </div>
+                                    <span asp-validation-for="SelectedUniformCatalogIds[@index]" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 mt-2 text-end">
+                                    <button type="button" class="btn btn-danger remove-uniform-btn">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                            index++;
+                        }
+                    }
+                }
+            </div>
+            <!-- Botón para añadir un nuevo uniforme -->
+            <div class="form-group row mt-2">
+                <div class="col-4"></div>
+                <div class="col-8">
+                    <button type="button" id="addUniformBtn" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Añadir Uniforme
+                    </button>
+                </div>
+            </div>
+            <br />
+
+            <div class="row mt-4">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-save me-2"></i> Guardar Cambios
+                    </button>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <a asp-action="Index" class="btn btn-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <br />
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            var uniformIndex = $('#uniformsContainer .uniform-item').length || 0;
+            // Añadir nuevo uniforme
+            $('#addUniformBtn').click(function () {
+                var newUniform = `
+                            <div class="form-group row mt-2 uniform-item">
+                                <div class="col-4">
+                                    <label for="UniformCatalog">Uniforme</label>
+                                </div>
+                                <div class="col-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tshirt"></i>
+                                        </span>
+                                        <select name="SelectedUniformCatalogIds[` + uniformIndex + `]" class="form-select" required data-msg-required="Por favor selecciona un uniforme.">
+                                            <option value="">Selecciona una prenda:</option>
+        @foreach (var item in Model.UniformCatalogList)
+        {
+                                                    <option value="@item.Value">@item.Text</option>
+        }
+                                        </select>
+                                        <span class="input-group-text">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                    </div>
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="SelectedUniformCatalogIds[` + uniformIndex + `]" data-valmsg-replace="true"></span>
+                                </div>
+                                <div class="col-12 mt-2 text-end">
+                                    <button type="button" class="btn btn-danger remove-uniform-btn">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                $('#uniformsContainer').append(newUniform);
+                uniformIndex++;
+                reindexUniforms();
+                updateUniformOptions();
+                // Reaplicar validación unobtrusive
+                var form = $("#representative-form");
+                $.validator.unobtrusive.parse(form);
+            });
+
+            // Eliminar uniforme
+            $('#uniformsContainer').on('click', '.remove-uniform-btn', function () {
+                $(this).closest('.uniform-item').remove();
+                reindexUniforms();
+                updateUniformOptions();
+            });
+
+            // Reindexar selectores de uniformes
+            function reindexUniforms() {
+                $('#uniformsContainer .uniform-item').each(function (index) {
+                    var select = $(this).find('select');
+                    var span = $(this).find('span.text-danger');
+                    // Actualizar el atributo 'name' del select
+                    select.attr('name', 'SelectedUniformCatalogIds[' + index + ']');
+                    // Actualizar el asp-validation-for del span
+                    span.attr('data-valmsg-for', 'SelectedUniformCatalogIds[' + index + ']');
+                });
+            }
+
+            // Actualizar las opciones de los uniformes seleccionados
+            function updateUniformOptions() {
+                var selectedUniforms = [];
+                // Obtener los valores seleccionados de todos los selects
+                $('#uniformsContainer .uniform-item select').each(function () {
+                    var selectedValue = $(this).val();
+                    if (selectedValue) {
+                        selectedUniforms.push(selectedValue);
+                    }
+                });
+                // Deshabilitar las opciones seleccionadas en otros selects
+                $('#uniformsContainer .uniform-item select').each(function () {
+                    var currentSelect = $(this);
+                    var currentValue = currentSelect.val();
+                    currentSelect.find('option').each(function () {
+                        var optionValue = $(this).attr('value');
+                        if (optionValue && selectedUniforms.includes(optionValue) && optionValue !== currentValue) {
+                            $(this).attr('disabled', true);
+                        } else {
+                            $(this).attr('disabled', false);
+                        }
+                    });
+                });
+            }
+
+            // Actualizar las opciones al cambiar de valor en un select
+            $('#uniformsContainer').on('change', '.uniform-item select', function () {
+                updateUniformOptions();
+            });
+
+            // Llamar a updateUniformOptions al cargar la página para deshabilitar las opciones seleccionadas
+            updateUniformOptions();
+        });
+    </script>
+}

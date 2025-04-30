@@ -1,0 +1,229 @@
+﻿@model SIIR.Models.ViewModels.DocumentVM
+
+@{
+    ViewData["Title"] = "Detalles del Documento";
+}
+
+<link rel="stylesheet" href="~/css/admin/documents/details.css" />
+
+<div class="container-fluid">
+    <div class="split-layout">
+        <!-- Panel Izquierdo -->
+        <div class="left-panel">
+            <div class="card">
+                <div class="document-header">
+                    <h1 class="document-title">@Model.Document.DocumentCatalog.Name</h1>
+                    <p class="document-description">@Model.Document.DocumentCatalog.Description</p>
+                    <a asp-action="Index" asp-route-studentId="@Model.Document.StudentId" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    <!-- Información del Estudiante -->
+                    <div class="student-info">
+                        <h3 class="h5 mb-3">Información del Estudiante</h3>
+                        <p class="mb-1"><strong>Nombre:</strong> @Model.Student.Name @Model.Student.LastName</p>
+                        <p class="mb-1"><strong>No. Control:</strong> @Model.Student.ControlNumber</p>
+                        <p class="mb-0"><strong>Carrera:</strong> @Model.Student.Career</p>
+
+                        @{
+                            var statusClass = Model.Document.Status switch
+                            {
+                                DocumentStatus.Pending => "status-pending",
+                                DocumentStatus.Approved => "status-approved",
+                                DocumentStatus.Rejected => "status-rejected",
+                                DocumentStatus.RequiresRenewal => "status-renewal",
+                                        _ => ""
+                            };
+
+                            var statusText = Model.Document.Status switch
+                            {
+                                DocumentStatus.Pending => "Pendiente",
+                                DocumentStatus.Approved => "Aprobado",
+                                DocumentStatus.Rejected => "Rechazado",
+                                DocumentStatus.RequiresRenewal => "Necesita Refrendo",
+                                _ => "Desconocido"
+                            };
+
+                            var statusIcon = Model.Document.Status switch
+                            {
+                                DocumentStatus.Pending => "clock",
+                                DocumentStatus.Approved => "check",
+                                DocumentStatus.Rejected => "times",
+                                DocumentStatus.RequiresRenewal => "clock",
+                                _ => "question"
+                            };
+                        }
+                        <div class="mt-3">
+                            <span class="document-status @statusClass"
+                            @(Model.Document.Status == DocumentStatus.Rejected ? $"data-bs-toggle='tooltip' title='{Model.Document.RejectionReason}'" : "")>
+                                <i class="fas fa-@statusIcon me-1"></i>@statusText
+                            </span>
+                            @if (Model.Document.Status == DocumentStatus.Rejected && !string.IsNullOrEmpty(Model.Document.RejectionReason))
+                            {
+                                <div class="mt-2 rejection-reason">
+                                    <small class="text-danger">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Motivo de rechazo: @Model.Document.RejectionReason
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="action-buttons">
+                        <div class="card-actions">
+                            <a asp-action="Download" asp-route-id="@Model.Document.Id" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i>Descargar
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                @if (Model.Document.Status == DocumentStatus.Pending)
+                                {
+                                    <button type="button" class="btn btn-success" onclick="approveDocument(@Model.Document.Id)">
+                                        <i class="fas fa-check me-1"></i>Aprobar
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="rejectDocument(@Model.Document.Id)">
+                                        <i class="fas fa-times me-1"></i>Rechazar
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Derecho - Previsualización -->
+        <div class="right-panel">
+            <div class="preview-container">
+                @{
+                    var fileExtension = System.IO.Path.GetExtension(Model.Document.Url)?.ToLower();
+                    var fileUrl = Url.Content("~/" + Model.Document.Url.TrimStart('\\'));
+                }
+
+                @if (new[] { ".pdf" }.Contains(fileExtension))
+                {
+                    <iframe src="@fileUrl" class="preview-frame" type="application/pdf"></iframe>
+                }
+                else if (new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension))
+                {
+                    <div class="card-img-container">
+                        <img src="@fileUrl" alt="@Model.Document.DocumentCatalog.Name">
+                    </div>
+                }
+                else if (new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(fileExtension))
+                {
+                    <div class="text-center p-4">
+                        <i class="fas fa-file fa-3x mb-3 text-muted"></i>
+                        <h4>Previsualización no disponible</h4>
+                        <p class="text-muted">Este tipo de documento no puede ser previsualizado directamente. Por favor, descargue el archivo para verlo.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center p-4">
+                        <i class="fas fa-question-circle fa-3x mb-3 text-muted"></i>
+                        <h4>Formato no soportado</h4>
+                        <p class="text-muted">Este tipo de archivo no puede ser previsualizado. Por favor, descargue el archivo para verlo.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Rechazo -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Motivo de Rechazo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="rejectionReason">Por favor, ingrese el motivo del rechazo:</label>
+                    <textarea id="rejectionReason" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="submitReject()">Rechazar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="statusForm" asp-action="ChangeStatus" method="post">
+    <input type="hidden" id="documentId" name="id" />
+    <input type="hidden" id="documentStatus" name="status" />
+    <input type="hidden" id="rejectionReasonInput" name="rejectionReason" />
+</form>
+
+@* @section Scripts {
+    <script src="~/js/documentDetails.js"></script>
+} *@
+<script>
+
+    function approveDocument(id) {
+        changeStatus(id, 'Approved');
+    }
+
+    function rejectDocument(id) {
+        //if (confirm('¿Estás seguro de que deseas rechazar este documento?')) {
+        //    changeStatus(id, 'Rejected');
+        //}
+        $('#rejectModal').modal('show');
+        // Guardamos el ID del documento para usarlo cuando se envíe el formulario
+        document.getElementById('documentId').value = id;
+    }
+
+    function submitReject() {
+        const reason = document.getElementById('rejectionReason').value;
+        if (!reason.trim()) {
+            alert('Por favor, ingrese un motivo de rechazo.');
+            return;
+        }
+
+        // Obtenemos el ID del documento y el motivo de rechazo
+        const id = document.getElementById('documentId').value;
+        changeStatus(id, 'Rejected', reason);
+
+        // Cerramos el modal
+        $('#rejectModal').modal('hide');
+
+        // Limpiamos el campo de texto
+        document.getElementById('rejectionReason').value = '';
+    }
+
+    function changeStatus(id, status, rejectionReason = null) {
+        document.getElementById('documentId').value = id;
+        document.getElementById('documentStatus').value = status;
+
+        if (status === 'Rejected') {
+            if (!rejectionReason) {
+                alert('Se requiere un motivo de rechazo.');
+                return;
+            }
+            document.getElementById('rejectionReasonInput').value = rejectionReason;
+        } else {
+            document.getElementById('rejectionReasonInput').value = '';
+        }
+
+        document.getElementById('statusForm').submit();
+    }
+
+    $(document).ready(function () {
+        $('#rejectModal').on('hidden.bs.modal', function () {
+            document.getElementById('rejectionReason').value = '';
+        });
+        // Aseguramos que el modal use la versión correcta de Bootstrap
+        $('#rejectModal').modal({
+            keyboard: true,
+            backdrop: 'static'
+        });
+    });
+</script>

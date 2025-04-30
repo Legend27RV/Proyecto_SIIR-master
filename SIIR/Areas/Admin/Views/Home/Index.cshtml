@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+<main class="container text-center mt-5">
+    <h2 class="display-4">SIIR</h2>
+    <p class="lead">Sistema Integral de Información de Grupos Representativos</p>
+
+    <div class="my-4 d-flex justify-content-center">
+        <div style="width: 300px; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img id="fox-image" src="/images/fox-americano.png" alt="Fox Mascot" class="img-fluid" style="object-fit: contain; max-width: 100%; max-height: 100%;">
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6 mb-4">
+            <a asp-area="Admin" asp-controller="Teams" asp-action="Index" asp-route-category="deportivos" class="btn btn-primary btn-lg w-50">
+                <i class="fas fa-running me-2"></i> Grupos Deportivos
+            </a>
+        </div>
+        <div class="col-md-6 mb-4">
+            <a asp-area="Admin" asp-controller="Teams" asp-action="Index" asp-route-category="culturales" class="btn btn-primary btn-lg w-50">
+                <i class="fas fa-music me-2"></i> Grupos Culturales
+            </a>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        const images = [
+            "/images/fox-basquet4.png",
+            "/images/fox-teatro.png",
+            "/images/fox-voleibol.png",
+            "/images/fox-bandaGuerra.png",
+            "/images/fox-futbol.png",
+            "/images/fox-musica.png",
+            "/images/fox-natacion.png",
+            "/images/fox-guitarra.png",
+            "/images/fox-arte.png",
+            "/images/fox-beisbol.png"
+        ];
+        let currentIndex = 0;
+        const imageElement = document.getElementById("fox-image");
+
+        // Precargar las imágenes
+        images.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % images.length;
+            imageElement.src = images[currentIndex];
+        }, 3000);
+    </script>
+}

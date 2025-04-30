@@ -1,0 +1,61 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_LayoutWithoutNavBar";
+}
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+</style>
+
+<h2 class="text-center mb-4 display-2">@ViewData["Title"]</h2>
+<div class="container flex-column">
+    <div class="login-container">
+        <section>
+            <form id="account" method="post" align="center">
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Ingrese su correo institucional" />
+                    <label asp-for="Input.Email" class="form-label">Correo</label>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Ingrese su contraseña" />
+                    <label asp-for="Input.Password" class="form-label">Contraseña</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Iniciar Sesión</button>
+                </div>
+                <div>
+                    <p class="text-center mt-3">
+                        <a id="forgot-password" asp-page="./ForgotPassword">Olvidaste tu contraseña?</a>
+                    </p>
+                </div>
+            </form>
+        </section>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $.extend($.validator.messages, {
+            required: "Este campo es obligatorio.",
+            email: "Por favor, introduce una dirección de correo válida.",
+            minlength: "Por favor, introduce al menos {0} caracteres.",
+            maxlength: "Por favor, no introduzcas más de {0} caracteres."
+        });
+    </script>
+}

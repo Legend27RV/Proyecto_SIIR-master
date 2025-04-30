@@ -1,0 +1,184 @@
+﻿@model SIIR.Models.ViewModels.DocumentVM
+
+@{
+    ViewData["Title"] = "Documentos del Estudiante";
+}
+
+<link rel="stylesheet" href="~/css/admin/documents/index.css" />
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12 col-md-8">
+            <h1 class="display-4 text-center text-md-start mb-3 mb-md-0" style="font-size: calc(1.5rem + 2vw)">
+                Documentos del Estudiante
+            </h1>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-end gap-2">
+                @if (Model.StudentDocuments.Any())
+                {
+                    <a asp-action="DownloadAll"
+                       asp-route-studentId="@Model.Student.Id"
+                       class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>
+                        <span class="d-none d-sm-inline">Descargar Todo</span>
+                        <span class="d-inline d-sm-none">Descargar</span>
+                    </a>
+                }
+                <a href="javascript:void(0)"
+                   onclick="history.back()"
+                   class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Información del Estudiante -->
+            <div class="student-info">
+                <h3 class="h5 mb-3">Información del Estudiante</h3>
+                <div class="d-flex align-items-center">
+                    @if (!string.IsNullOrEmpty(Model.Student.ImageUrl))
+                    {
+                        <img src="@Model.Student.ImageUrl"
+                             alt="Foto del Capitán"
+                             class="rounded-circle me-3"
+                             style="width: 60px; height: 60px; object-fit: cover"
+                             onerror="this.onerror=null; this.src='/images/zorro_default.png';" />
+                    }
+                    else
+                    {
+                        <img src="/images/zorro_default.png"
+                             alt="Imagen por defecto"
+                             class="rounded-circle me-3"
+                             style="width: 60px; height: 60px; object-fit: cover" />
+                    }
+                    <div>
+                        <h6 class="mb-1">@Model.Student.Name @Model.Student.LastName</h6>
+                        <p class="mb-1 text-muted">
+                            No. Control: @Model.Student.ControlNumber<br />
+                            Carrera: @Model.Student.Career<br />
+                            Semestre: @Model.Student.Semester
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Mostrar mensaje si no hay documentos registrados -->
+    @if (!Model.StudentDocuments.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            No hay documentos registrados para este estudiante.
+        </div>
+    }
+    else
+    {
+        <!-- Mostrar los documentos en una tabla si existen -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="documentsTable">
+                        <thead>
+                            <tr>
+                                <th>Documento</th>
+                                <th>Fecha de Subida</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Iterar sobre los documentos del estudiante -->
+                            @foreach (var doc in Model.StudentDocuments)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="document-name">@doc.DocumentCatalog.Name</div>
+                                        @* @if (!string.IsNullOrEmpty(doc.DocumentCatalog.Description))
+                                        {
+                                            <div class="document-description">@doc.DocumentCatalog.Description</div>
+                                        } *@
+                                    </td>
+                                    <td>@doc.UploadDate</td>
+                                    <td>
+                                        <!-- Mostrar el estado del documento con un estilo visual -->
+                                        @switch (doc.Status)
+                                        {
+                                            case DocumentStatus.Pending:
+                                                <span class="badge-status badge-pending">
+                                                    <i class="fas fa-clock status-icon"></i>
+                                                    <span class="status-text">Pendiente</span>
+                                                </span>
+                                                break;
+                                            case DocumentStatus.Approved:
+                                                <span class="badge-status badge-approved">
+                                                    <i class="fas fa-check status-icon"></i>
+                                                    <span class="status-text">Aprobado</span>
+                                                </span>
+                                                break;
+                                            case DocumentStatus.Rejected:
+                                                <span class="badge-status badge-rejected">
+                                                    @* <i class="fas fa-times status-icon"></i> *@
+                                                    
+                                                    @if (!string.IsNullOrEmpty(doc.RejectionReason))
+                                                    {
+                                                        <i class="fas fa-info-circle ms-1"
+                                                           data-bs-toggle="tooltip"
+                                                           data-bs-placement="top"
+                                                           title="@doc.RejectionReason"></i>
+                                                    }
+                                                    <span class="status-text">Rechazado</span>
+                                                </span>
+                                                break;
+                                            case DocumentStatus.RequiresRenewal:
+                                                <span class="badge-status badge-renewal">
+                                                    <i class="fas fa-clock status-icon"></i>
+                                                    <span class="status-text">Necesita Refrendo</span>
+                                                </span>
+                                                break;
+
+                                        }
+                                    </td>
+                                    <td>
+                                        <!-- Botones para ver detalles o descargar el documento -->
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a asp-action="Details" asp-route-id="@doc.Id"
+                                               class="btn btn-info btn-sm" title="Ver Detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Download" asp-route-id="@doc.Id"
+                                               class="btn btn-primary btn-sm" title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<!-- Formulario oculto para cambiar el estado del documento -->
+<form id="statusForm" asp-action="ChangeStatus" method="post">
+    <input type="hidden" id="documentId" name="id" />
+    <input type="hidden" id="documentStatus" name="status" />
+</form>
+
+@section Scripts {
+    <script src="~/js/documentAdmin.js"></script>
+}
+<script>
+    // Inicializar todos los tooltips
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

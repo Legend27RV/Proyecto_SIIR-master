@@ -1,0 +1,261 @@
+﻿@model SIIR.Models.ViewModels.TeamVM
+@{
+    ViewData["Title"] = "Plantilla del Equipo";
+}
+
+<link rel="stylesheet" href="~/css/admin/teams/roster.css" />
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <input type="hidden" id="teamId" value="@Model.Team.Id" />
+            <h1 class="display-4">@Model.Team.Name</h1>
+        </div>
+    </div>
+
+    <!-- Seccion de info del equipo-->
+    <div class="row mt-4">
+        <!-- Columna izquierda: Capitán y Coach -->
+        <div class="col-md-6 d-flex flex-column">
+            <!-- Información del Capitán -->
+            <div class="flex-grow-1 mb-3">
+                @if (Model.Captain != null)
+                {
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">Capitán del Equipo</h5>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                @if (!string.IsNullOrEmpty(Model.Captain.ImageUrl))
+                                {
+                                    <img src="@Model.Captain.ImageUrl" 
+                                    alt="Foto del Capitán"
+                                    class="rounded-circle me-3" 
+                                    style="width: 60px; height: 60px; object-fit: cover"
+                                    onerror="this.onerror=null; this.src='/images/zorro_default.png';" />
+                                }
+                                else
+                                {
+                                    <img src="/images/zorro_default.png" 
+                                    alt="Imagen por defecto"
+                                    class="rounded-circle me-3" 
+                                    style="width: 60px; height: 60px; object-fit: cover" />
+                                }
+                                <div>
+                                    <h6 class="mb-1">@Model.Captain.Name @Model.Captain.LastName @Model.Captain.SecondLastName</h6>
+                                    <p class="mb-3 text-muted">
+                                        No. Control: @Model.Captain.ControlNumber<br />
+                                        Carrera: @Model.Captain.Career
+                                    </p>
+                                    <button id="changeCaptainBtn" class="btn btn-primary btn-sm">
+                                        <i class="fa-solid fa-pen-to-square me-2"></i>
+                                        Cambiar Capitán
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="captainId" value="@Model.Captain.Id" />
+                }
+                else
+                {
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Capitán del Equipo</h5>
+                            <div class="alert alert-info">
+                                No se ha designado un capitán para este equipo
+                                <button id="changeCaptainBtn" class="btn btn-primary btn-sm">
+                                    <i class="fa-solid fa-pen-to-square me-2"></i>
+                                    Cambiar Capitán
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Información del Coach -->
+            <div class="flex-grow-1 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Entrenador(a):</h5>
+                        @if (Model.Team.Coach != null)
+                        {
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="mb-1">@Model.Team.Coach.Name @Model.Team.Coach.LastName @Model.Team.Coach.SecondLastName</h6>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="mb-0 text-muted">No hay entrenador asignado</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Foto del equipo -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-0 d-flex align-items-center justify-content-center" style="background-color: #f8f9fa;">
+                    <img src="@(Model.Team.ImageUrl ?? "/images/no-image-team.png")" alt="Foto del Equipo"
+                         class="img-fluid" style="max-width: 100%; max-height: 300px; object-fit: contain;" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Estadísticas y Acciones -->
+    <div class="row mt-4">
+        <div class="col-12">
+            @if (Model.StudentList != null && Model.StudentList.Any())
+            {
+                <h5>Miembros del equipo: @Model.StudentList.Count()</h5>
+            }
+            else
+            {
+                <h5>No hay estudiantes registrados en este equipo</h5>
+            }
+        </div>
+
+        <div class="container">
+            <div class="row g-3">
+                <!-- Contenedor Izquierdo (30%) -->
+                <div class="col-12 col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <!-- Grupo de botones: Acciones -->
+                            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                                <h5 class="card-title text-center">Acciones</h5>
+                                <div class="row g-1 mt-3">
+                                    <a class="btn btn-primary mt-0 w-100" asp-area="Identity" asp-controller="Account" asp-action="Register">
+                                        <i class="fas fa-user-plus"></i> Crear Usuario
+                                    </a>
+                                    <button id="generateCertificateBtn" class="btn btn-success w-100">
+                                        <i class="fa-solid fa-address-card"></i> Generar Cédula
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor Derecho (70%) -->
+                <div class="col-12 col-md-8">
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <!-- Grupo de botones: Descargar Información -->
+                            <h5 class="card-title text-center">Descargar Información</h5>
+                            <div class="row g-1 mt-3">
+                                <!-- Botones en fila 1 -->
+                                <div class="col-6">
+                                    <button onclick="downloadAllInfo()" class="btn btn-info w-100 h-100" style="color:white">
+                                        <i class="fas fa-download"></i> Equipo
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button onclick="descargarDocsEquipo()" class="btn btn-success w-100 h-100">
+                                        <i class="fas fa-file-download"></i> Documentos
+                                    </button>
+                                </div>
+
+                                <!-- Botones en fila 2 -->
+                                <div class="col-6">
+                                    <button onclick="downloadUniformInfo()" class="btn btn-secondary w-100 h-100" style="color:white">
+                                        <i class="fas fa-shirt"></i> Uniformes
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button onclick="downloadListStudents()" class="btn btn-primary w-100 h-100">
+                                        <i class="fas fa-table-list"></i> Estudiantes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+
+        <!-- Switch para cambiar vista -->
+        <div class="col-12 mt-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="viewSwitch">
+                <label class="form-check-label" for="viewSwitch">Vista de Tarjetas</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista de tabla -->
+    <div id="tableView" class="table-responsive mt-4">
+        <table id="tblRoster" class="table table-striped table-bordered" style="width:100%" data-team-id="@Model.Team.Id">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Carrera</th>
+                    <th>No. Control</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <!-- Vista de tarjetas -->
+    <div id="cardView" class="row g-4 mt-2" style="display: none;">
+        <!-- Las tarjetas se generarán aquí dinámicamente -->
+    </div>
+</div>
+
+<!-- Modal para cambiar capitán -->
+<div class="modal fade" id="changeCaptainModal" tabindex="-1" aria-labelledby="changeCaptainModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeCaptainModalLabel">Cambiar Capitán del Equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="studentSelect" class="form-label">Seleccionar Nuevo Capitán</label>
+                    <select class="form-select" id="studentSelect">
+                        <option value="">Seleccionar estudiante...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmCaptainChange">Confirmar Cambio</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ModalCertificate" data-team-name="@Model.Team.Name"
+         data-coach-team='@Html.Raw(Json.Serialize(Model.Team.Coach))' />
+
+@section Scripts {
+    <script src="~/js/roster.js"></script>
+    <script>
+        var getStudentsUrl = '@Url.Action("GetStudentsByTeamId", "Teams", new { area = "Admin" })';
+        var changeCaptainUrl = '@Url.Action("ChangeCaptain", "Teams", new { area = "Admin" })';
+        var downloadAllInfoUrl = '@Url.Action("GenerateStudentsCertificates", "Teams", new { area = "Admin" })';
+        var downloadCertificate = '@Url.Action("GenerateCertificate", "Teams", new { area = "Admin" })';
+        var downloadAllDocsUrl = '@Url.Action("DownloadAllByTeam", "Document", new { area = "Admin" })';
+
+        const teamName = "@Model.Team.Name";
+        const category = "@Model.Team.Representative.Category";
+        const CATEGORY_ALLOWED = "@SIIR.Utilities.Categorys.Deportivo";
+        const coachTeam = @Html.Raw(Json.Serialize(Model.Team.Coach));
+        var userRole = '@ViewBag.UserRole';
+    </script>
+}

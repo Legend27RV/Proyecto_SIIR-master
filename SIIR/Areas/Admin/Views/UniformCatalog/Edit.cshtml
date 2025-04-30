@@ -1,0 +1,57 @@
+﻿@model SIIR.Models.UniformCatalog
+@{
+    ViewData["Title"] = "Editar uniforme";
+}
+
+<br />
+<br />
+<h2 class="text-center">Editar uniforme</h2>
+<form method="POST" asp-action="Edit" enctype="multipart/form-data">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row px-2 mx-3 border">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-12 mt-4">
+            <div class="form-group row">
+                <div class="col-md-4 col-sm-12">
+                    <label asp-for="Name"></label>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                    <input asp-for="Name" class="form-control" placeholder="Ingresa el nombre del uniforme" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <br />
+            <div class="form-group row">
+                <div class="col-md-4 col-sm-12">
+                    <label asp-for="Description"></label>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                    <textarea asp-for="Description" class="form-control" placeholder="Ingresa la descripción" rows="5"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+            <br />
+
+            <div class="row mt-4">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-save me-2"></i> Guardar Cambios
+                    </button>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <a asp-action="Index" class="btn btn-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <br />
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

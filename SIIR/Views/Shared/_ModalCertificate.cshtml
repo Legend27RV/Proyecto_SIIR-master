@@ -1,0 +1,127 @@
+﻿<style>
+    .partial .no-hover:hover {
+        background-color: transparent;
+        color: inherit;
+    }
+
+    .partial .modal-header {
+        background-color: #1a3c6e;
+        color: white;
+    }
+
+    .partial .card-img-top {
+        max-height: 150px;
+        object-fit: cover;
+        object-position: center;
+        width: 100%;
+    }
+
+    .partial .checkbox {
+        background-color: white;
+        color: black;
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        text-align: center;
+    }
+
+    .partial .btn-check:checked + .checkbox {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .partial .checkbox:hover {
+        background-color: white;
+        color: inherit;
+    }
+
+    .partial .checkbox-div {
+        border: none;
+    }
+
+    .partial .title {
+        background-color: #1a3c6e;
+        min-height: 50px;
+    }
+
+    .partial .card {
+        max-width: 200px;
+        max-height: 250px;
+        margin: 0 auto;
+    }
+
+    .partial .btn-generar-cedula {
+        background-color: #1a3c6e;
+    }
+
+    .partial .btn-x {
+        color: white;
+        background-color: transparent;
+        border: none;
+    }
+
+    .partial .image-placeholder {
+        height: 150px; /* Ajusta según el tamaño que quieras */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 70px;
+    }
+
+    .partial .students-container .card
+    {
+        height: 230px;
+    }
+
+    @@media (max-width: 400px) {
+        .partial .row-cols-custom-1 {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .partial .row-cols-custom-1 .col {
+            flex: 0 0 100%; /* 1 columna en pantallas pequeñas */
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- Modal -->
+<div class="partial modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Generar cédula</h1>
+                <button type="button" class="btn-x" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end align-content-center mb-0 gap-2">
+                    <p class="fs-5 checkbox-div">Todos: </p>
+                    <div class="checkbox-div mt-0">
+                        <input type="checkbox" class="btn-check" id="checkboxAll" autocomplete="off">
+                        <label class="btn btn-sm checkbox" for="checkboxAll">
+                            <i class="fa-solid fa-check"></i>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 students-container">
+                    <!-- Las tarjetas se generarán aquí -->
+                </div>
+
+                <div class="not-found text-center mt-4">
+                    <i class="fa-solid fa-ban fs-2" style="color: red"></i>
+                    <p class="fs-2 mb-0">No se encontraron elementos</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button id="btn-generar-credencial" type="button" class="btn btn-primary">
+                    Credenciales
+                </button>
+                <button id="btn-generar-cedula" type="button" class="btn btn-primary">
+                    Cedula
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

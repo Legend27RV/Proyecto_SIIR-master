@@ -1,0 +1,104 @@
+﻿@page
+@using SIIR.Utilities
+@model RegisterModel
+@{
+    ViewData["Title"] = "Registrar";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="text-center display-5">@ViewData["Title"]</h1>
+            <div class="card">
+                <div class="card-body">
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <h2 class="card-title text-center display-6">Agrega un Nuevo Usuario</h2>
+                        <hr />
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="correo@queretaro.tecnm.mx" />
+                            <label asp-for="Input.Email">Correo</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Campos adicionales para Admin y Coach -->
+                        <div id="additionalFields">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Name" class="form-control" aria-required="true" placeholder="Nombre" />
+                                <label asp-for="Input.Name">Nombre</label>
+                                <span asp-validation-for="Input.Name" class="text-danger"></span>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.LastName" class="form-control" aria-required="true" placeholder="Apellido Paterno" />
+                                <label asp-for="Input.LastName">Apellido Paterno</label>
+                                <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.SecondLastName" class="form-control" aria-required="true" placeholder="Apellido Materno" />
+                                <label asp-for="Input.SecondLastName">Apellido Materno</label>
+                                <span asp-validation-for="Input.SecondLastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Selector de roles -->
+                        <div class="form-group mb-3">
+                            <h4 class="text-center mb-3">Selecciona un rol</h4>
+                            <div class="d-flex justify-content-center">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rdUserRole" id="adminRole" value="@CNT.AdminRole" required />
+                                        <label class="form-check-label" for="adminRole">Administrador</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rdUserRole" id="coachRole" value="@CNT.CoachRole" required />
+                                        <label class="form-check-label" for="coachRole">Coach</label>
+                                    </div>
+                                }
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="rdUserRole" id="studentRole" value="@CNT.StudentRole" required />
+                                    <label class="form-check-label" for="studentRole">Estudiante</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown para seleccionar equipo (solo para estudiantes) -->
+                        <div id="teamSelection" class="form-floating mb-3" style="display: none;">
+                            <select asp-for="Input.TeamId" asp-items="Model.TeamList" class="form-select">
+                                <option value="">Seleccione un equipo</option>
+                            </select>
+                            <label asp-for="Input.TeamId">Equipo</label>
+                            <span asp-validation-for="Input.TeamId" class="text-danger"></span>
+                        </div>
+
+                        <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('input[name="rdUserRole"]').change(function () {
+                var selectedRole = $('input[name="rdUserRole"]:checked').val();
+                if (selectedRole === '@CNT.AdminRole' || selectedRole === '@CNT.CoachRole') {
+                    $('#additionalFields').show();
+                    $('#teamSelection').hide();
+                } else if (selectedRole === '@CNT.StudentRole') {
+                    $('#additionalFields').show();
+                    $('#teamSelection').show();
+                } else {
+                    $('#additionalFields').hide();
+                    $('#teamSelection').hide();
+                }
+            });
+
+            // Trigger change event on page load
+            $('input[name="rdUserRole"]:checked').change();
+        });
+    </script>
+}

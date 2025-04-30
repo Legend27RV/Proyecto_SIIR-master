@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = "_LayoutWithoutNavBar";
+}
+<link rel="stylesheet" href="~/css/student/dashboard.css" />
+
+<div class="container">
+    <div class="dashboard-container d-flex mt-5">
+        <div class="row g-3">
+            <div class="img-container col-md-4 d-flex align-items-center">
+                <img class="profile-picture" src="@ViewData["ImageUrl"]" alt="Foto de perfil" onerror="this.onerror=null; this.src='/images/zorro_default.png';" />
+            </div>
+            <div class="student-info col-md-8 d-flex align-items-center">
+                <div class="row mx-2">
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Nombre Completo</label>
+                        <input class="form-control" type="text" value="@ViewData["FullName"]" aria-label="Disabled" disabled placeholder="Sin actualizar">
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label class="form-label">Numero control</label>
+                        <input class="form-control" type="text" value="@ViewData["ControlNumber"]" aria-label="Disabled" disabled placeholder="Sin actualizar">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label class="form-label">Semestre</label>
+                        <input class="form-control" type="text" value="@ViewData["Semester"]" aria-label="Disabled" disabled placeholder="Sin actualizar">
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Carrera</label>
+                        <input class="form-control" type="text" value="@ViewData["Career"]" aria-label="Disabled" disabled placeholder="Sin actualizar">
+                    </div>
+                    <div class="col-12">
+                        <label class="mb-1">Grupo Representativo</label>
+                        <input class="form-control" type="text" value="@ViewData["TeamName"]" aria-label="Disabled" disabled placeholder="Sin actualizar">
+                    </div>
+                </div>
+            </div>
+            <div class="btn-container col-12 d-flex mt-3 justify-content-center flex-column flex-sm-row">
+
+                <a asp-action="Edit" asp-route-id="@ViewData["StudentId"]" class="btn btn-primary mx-3 my-2">Modificar información</a>
+                <a asp-controller="Document" asp-action="Index" class="btn btn-primary mx-3 my-2">Cargar documentos</a>
+            </div>
+            <div class="btn-container col-12 d-flex mt-3 justify-content-center flex-column flex-sm-row">
+                @if (ViewData["IsCaptain"] != null && (bool)ViewData["IsCaptain"])
+                {
+                    <a asp-area="Student" asp-controller="Home" asp-action="Roster"
+                       asp-route-id="@ViewData["TeamId"]" class="btn btn-success mx-3 my-2">
+                        Administrar equipo
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
