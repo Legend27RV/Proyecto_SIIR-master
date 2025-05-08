@@ -9,6 +9,7 @@ using SIIR.Utilities;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configura la cultura para espa�ol
@@ -20,8 +21,12 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 /*var connectionString = builder.Configuration.GetConnectionString("ConexionSQL") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));*/
+var connectionString = builder.Configuration.GetConnectionString("ConexionPostgres") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("DummyDatabase"));
+    options.UseNpgsql(connectionString
+    ,b => b.MigrationsAssembly("SIIR")));
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseInMemoryDatabase("DummyDatabase"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddMvc()
@@ -91,6 +96,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 });
 
 
+/*
 // Seed default users
 using (var scope = app.Services.CreateScope())
 {
@@ -156,7 +162,53 @@ using (var scope = app.Services.CreateScope())
             await userManager.AddToRoleAsync(user, "Student");
         }
     }
-}
+    
+    string email_target = "l20140959@queretaro.tecnm.mx"; // o cualquier correo existente
+    string newPassword = "Coach123!";
+
+    var existingUser = await userManager.FindByEmailAsync(email_target);
+    if (existingUser != null)
+    {
+        var token = await userManager.GeneratePasswordResetTokenAsync(existingUser);
+        var result = await userManager.ResetPasswordAsync(existingUser, token, newPassword);
+
+        if (result.Succeeded)
+        {
+            Console.WriteLine("Contraseña actualizada correctamente.");
+        }
+        else
+        {
+            Console.WriteLine("Error al cambiar contraseña:");
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"- {error.Description}");
+            }
+        }
+    }
+
+    string email_target = "l20140956@queretaro.tecnm.mx"; // o cualquier correo existente
+    string newPassword = "Coach123!";
+
+    var existingUser = await userManager.FindByEmailAsync(email_target);
+    if (existingUser != null)
+    {
+        var token = await userManager.GeneratePasswordResetTokenAsync(existingUser);
+        var result = await userManager.ResetPasswordAsync(existingUser, token, newPassword);
+
+        if (result.Succeeded)
+        {
+            Console.WriteLine("Contraseña actualizada correctamente.");
+        }
+        else
+        {
+            Console.WriteLine("Error al cambiar contraseña:");
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"- {error.Description}");
+            }
+        }
+    }
+}*/
 
 app.UseStaticFiles();
 

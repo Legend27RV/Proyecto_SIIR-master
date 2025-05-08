@@ -28,29 +28,7 @@ namespace SIIR.Areas.Student.Controllers
             _webHostEnvironment = webHostEnvironment;
             _contenedorTrabajo = contenedorTrabajo;
         }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-
-        public IActionResult Roster(int? id)
-        {
-            return View();
-        }
-
-        public async Task<IActionResult> Edit()
-        {
-            return View();
-        }
         
-        public async Task<IActionResult> Edit(StudentUniformVM studentVM)
-        {
-            return View();
-        }
-        
-        /*
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -220,7 +198,7 @@ namespace SIIR.Areas.Student.Controllers
 
 				/*Agregar el numero a cada uniforme y la talla */
 
-        /*
+        
 				if (studentVM.uniforms != null)
 				{
 					foreach (var uniform in studentVM.uniforms)
@@ -288,6 +266,6 @@ namespace SIIR.Areas.Student.Controllers
 
             team.Coach = _contenedorTrabajo.Coach.GetById(team.CoachId);
             return View(teamVM);
-        }*/
+        }
     }
 }

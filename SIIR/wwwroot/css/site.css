@@ -16,6 +16,15 @@ tbody{
     font-variant: normal !important;
 }
 
+.nav-link{
+    color: black !important;
+}
+
+.nav-link.active{
+    background-color: #ec8013 !important;
+    color: black !important;
+}
+
 .btn-primary {
     color: #000;
     font-variant: small-caps;

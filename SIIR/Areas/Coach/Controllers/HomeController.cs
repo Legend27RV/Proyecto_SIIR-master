@@ -45,7 +45,7 @@ namespace SIIR.Areas.Coach.Controllers
                 return NotFound($"User with ID {userId} not found.");
             }
             Console.WriteLine($"User found: {user.Email}"); // Debugging
-            if (user.CoachId != null)
+            if (user.CoachId == null)
             { 
                 return NotFound($"User {user.Email} does not have a CoachId.");
             }
