@@ -146,7 +146,7 @@ namespace SIIR.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Coach")]
         public async Task<IActionResult> ChangeStatus(int id, string status, string rejectionReason)
         {
             var document = _contenedorTrabajo.Document.GetDocumentWithCatalog(id);

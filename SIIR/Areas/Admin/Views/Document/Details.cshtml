@@ -78,7 +78,7 @@
                             <a asp-action="Download" asp-route-id="@Model.Document.Id" class="btn btn-primary">
                                 <i class="fas fa-download me-1"></i>Descargar
                             </a>
-                            @if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Coach"))
                             {
                                 @if (Model.Document.Status == DocumentStatus.Pending)
                                 {

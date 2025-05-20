@@ -377,7 +377,9 @@
 							@if (@Model.student.Team.Representative.Category == "Deportivo")
 							{
 								<div class="d-flex align-items-center gap-2">
+									<!-- Para Cambio de Numero No si estudiante Cultural -->
 									<label asp-for="student.numberUniform" class="form-label mb-0">Número:</label>
+
 									<input asp-for="student.numberUniform" class="form-control numberInput text-center" placeholder="" />
 									<span asp-validation-for="student.numberUniform" class="text-danger"></span>
 								</div>

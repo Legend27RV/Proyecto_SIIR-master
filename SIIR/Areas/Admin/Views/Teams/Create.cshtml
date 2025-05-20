@@ -58,9 +58,44 @@
                                     </span>
                                     <input type="file" class="form-control" name="archivos" id="subidaArchivo" />
                                 </div>
+
+                                <!-- Vista previa de la imagen cargada -->
+                                <div class="mt-3" id="imagePreviewContainer" style="display:none;">
+                                    <p><strong>Recorta la imagen:</strong></p>
+                                    <img id="imagePreview" style="max-width: 100%; border: 1px solid #ccc;" />
+
+                                    <!-- Controles: selector + botón, centrados y del mismo tamaño -->
+                                    <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                                        <select id="aspectRatioSelector" class="form-select form-select-sm w-auto">
+                                            <option value="NaN">Libre</option>
+                                            <option value="1">1:1</option>
+                                            <option value="4/3">4:3</option>
+                                            <option value="16/9">16:9</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-success" id="cropButton">Aceptar recorte</button>
+                                    </div>
+                                </div>
+
+                                <!-- Vista previa de la imagen recortada -->
+                                <div class="mt-3 text-center" id="croppedPreviewContainer" style="display:none;">
+                                    <p><strong>Vista previa de la imagen recortada:</strong></p>
+                                    <img id="croppedPreview" style="max-height: 50vh; width: auto; border: 1px solid #ccc; border-radius: 4px;" />
+
+                                    <!-- Botón para volver a recortar -->
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-warning btn-sm" id="btnEditarRecorte">
+                                            Volver a recortar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Imagen resultante base64 -->
+                                <input type="hidden" id="croppedImageData" name="CroppedImage" />
+
                                 <span asp-validation-for="Team.ImageUrl" class="text-danger"></span>
                             </div>
                         </div>
+                        
                         <div class="form-group row mt-2">
                             <div class="col-md-4 col-sm-12">
                                 <label for="Coach">Coach</label>
@@ -72,6 +107,11 @@
                                         <i class="fas fa-user-tie"></i>
                                     </span>
                                     @Html.DropDownListFor(m => m.Team.CoachId, Model.CoachList, "Selecciona un Coach:", new { @class = "form-select" })
+                                </div>
+                                <div class="mt-2" style="text-align: right;">
+                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">
+                                    Crear nuevo Coach
+                                    </a>
                                 </div>
                                 <span asp-validation-for="Team.CoachId" class="text-danger"></span>
                             </div>
@@ -88,3 +128,89 @@
         </div>
     </div>
 </div>
+
+<!-- Cropper.js CSS y JS -->
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+    let cropper;
+    let originalImageDataURL; // para recortar de nuevo
+
+    const fileInput = document.getElementById('subidaArchivo');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const cropButton = document.getElementById('cropButton');
+    const croppedImageData = document.getElementById('croppedImageData');
+    const aspectRatioSelector = document.getElementById('aspectRatioSelector');
+    const croppedPreviewContainer = document.getElementById('croppedPreviewContainer');
+    const croppedPreview = document.getElementById('croppedPreview');
+    const btnEditarRecorte = document.getElementById('btnEditarRecorte');
+
+    fileInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                originalImageDataURL = event.target.result; // Guardamos la imagen original
+                imagePreview.src = originalImageDataURL;
+                imagePreviewContainer.style.display = 'block';
+                croppedPreviewContainer.style.display = 'none';
+
+                imagePreview.onload = () => {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(imagePreview, {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        movable: true,
+                        scalable: true,
+                        zoomable: false,
+                        rotatable: false,
+                        responsive: true
+                    });
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    cropButton.addEventListener('click', function () {
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas();
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            croppedImageData.value = dataUrl;
+
+            croppedPreview.src = dataUrl;
+            croppedPreviewContainer.style.display = 'block';
+            imagePreviewContainer.style.display = 'none';
+        }
+    });
+
+    aspectRatioSelector.addEventListener('change', function () {
+        const value = this.value;
+        const ratio = value === "NaN" ? NaN : eval(value);
+        if (cropper) {
+            cropper.setAspectRatio(ratio);
+        }
+    });
+
+    // Botón para volver a recortar
+    btnEditarRecorte.addEventListener('click', function () {
+        imagePreview.src = originalImageDataURL;
+        croppedPreviewContainer.style.display = 'none';
+        imagePreviewContainer.style.display = 'block';
+
+        imagePreview.onload = () => {
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(imagePreview, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                movable: true,
+                scalable: true,
+                zoomable: true,
+                rotatable: false,
+                responsive: true
+            });
+        };
+    });
+</script>

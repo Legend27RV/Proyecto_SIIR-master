@@ -95,7 +95,6 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
-
 /*
 // Seed default users
 using (var scope = app.Services.CreateScope())
@@ -186,8 +185,8 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    string email_target = "l20140956@queretaro.tecnm.mx"; // o cualquier correo existente
-    string newPassword = "Coach123!";
+    string email_target = "l20140957@queretaro.tecnm.mx"; // o cualquier correo existente
+    string newPassword = "Student123!";
 
     var existingUser = await userManager.FindByEmailAsync(email_target);
     if (existingUser != null)

@@ -10,6 +10,14 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
+.btn-info{
+    color: black;
+    font-variant: small-caps;
+    background-color: #ec8013 !important;
+    border-color: #ec971c !important;
+    vertical-align: middle !important;
+}
+
 .filter-header {
     display: flex;
     align-items: center;

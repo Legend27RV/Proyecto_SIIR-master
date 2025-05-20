@@ -59,11 +59,11 @@ namespace SIIR.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public IActionResult Create(TeamVM teamVM)
+        public IActionResult Create(TeamVM teamVM, string CroppedImage)
         {
             ModelState.Remove("Team.ImageUrl");
             ModelState.Remove("Team.Name");
-            
+
             if (ModelState.IsValid)
             {
                 string webRootPath = _hostingEnvironment.WebRootPath;
@@ -78,13 +78,14 @@ namespace SIIR.Areas.Admin.Controllers
                 {
                     teamVM.Team.Name = teamVM.Team.Representative.Name + " " + teamVM.Team.Category;
                 }
-                
+
                 var existingTeam = _contenedorTrabajo.Team.GetFirstOrDefault(t => t.Name == teamVM.Team.Name);
                 if (existingTeam != null)
                 {
                     // Agrega un error personalizado al ModelState
                     ModelState.AddModelError("Team.RepresentativeId", "El equipo " + teamVM.Team.Name + " ya existe");
                 }
+                /*
                 else if (teamVM.Team.Id == 0 && files.Count() > 0)
                 {
                     // Nuevo equipo
@@ -102,6 +103,27 @@ namespace SIIR.Areas.Admin.Controllers
                     _contenedorTrabajo.Save();
                     return RedirectToAction(nameof(Index));
                 }
+                */
+                else if (teamVM.Team.Id == 0 && !string.IsNullOrEmpty(CroppedImage))
+                {
+                    string fileName = Guid.NewGuid().ToString() + ".jpg";
+                    var uploads = Path.Combine(webRootPath, @"images\teams");
+
+                    if (!Directory.Exists(uploads))
+                        Directory.CreateDirectory(uploads);
+
+                    var base64 = CroppedImage.Substring(CroppedImage.IndexOf(",") + 1);
+                    var bytes = Convert.FromBase64String(base64);
+                    var filePath = Path.Combine(uploads, fileName);
+
+                    System.IO.File.WriteAllBytes(filePath, bytes);
+
+                    teamVM.Team.ImageUrl = @"\images\teams\" + fileName;
+                    _contenedorTrabajo.Team.Add(teamVM.Team);
+                    _contenedorTrabajo.Save();
+                    return RedirectToAction(nameof(Index));
+                }
+
             }
             ModelState.AddModelError("Team.ImageUrl", "Debes seleccionar una imagen");
             teamVM.RepresentativeList = _contenedorTrabajo.Representative.GetRepresentativesList();

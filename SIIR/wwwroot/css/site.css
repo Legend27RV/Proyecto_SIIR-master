@@ -168,3 +168,8 @@ body {
         display: none;
     }
 }
+
+.cropper-container {
+    box-shadow: none !important;
+    background: transparent !important;
+}
