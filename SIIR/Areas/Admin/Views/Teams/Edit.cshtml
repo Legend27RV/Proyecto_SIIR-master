@@ -38,16 +38,56 @@
                                 </div>
                                 <span asp-validation-for="Team.Category" class="text-danger"></span>
                             </div>
+                            
                             <div class="mb-3">
                                 <label asp-for="Team.ImageUrl" class="form-label fw-bold">Imagen del equipo</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-image"></i>
                                     </span>
-                                    <input type="file" class="form-control" name="archivos" id="subidaArchivo" />
+                                    <input type="file" class="form-control" name="archivos" id="subidaArchivo" accept="image/*" />
                                 </div>
+
+                                <!-- Contenedor imagen existente, visible solo si no hay nuevo archivo -->
+                                <div class="mt-3" id="existingImageContainer" style="text-align:center;">
+                                    <p><strong>Imagen actual:</strong></p>
+                                    <img id="existingImagePreview" src="@Model.Team.ImageUrl" style="max-width:100%; max-height:200px; border:1px solid #ccc; border-radius:4px;" alt="Imagen existente" />
+                                </div>
+
+                                <!-- Cropper UI, oculto inicialmente -->
+                                <div class="mt-3" id="imagePreviewContainer" style="display:none;">
+                                    <p><strong>Recorta la imagen:</strong></p>
+                                    <img id="imagePreview" style="max-width: 100%; border: 1px solid #ccc;" />
+
+                                    <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                                        <select id="aspectRatioSelector" class="form-select form-select-sm w-auto">
+                                            <option value="NaN">Libre</option>
+                                            <option value="1">1:1</option>
+                                            <option value="4/3">4:3</option>
+                                            <option value="16/9">16:9</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-success" id="cropButton">Aceptar recorte</button>
+                                    </div>
+                                </div>
+
+                                <!-- Vista previa de imagen recortada, oculto inicialmente -->
+                                <div class="mt-3 text-center" id="croppedPreviewContainer" style="display:none;">
+                                    <p><strong>Vista previa de la imagen recortada:</strong></p>
+                                    <img id="croppedPreview" style="max-height: 50vh; width: auto; border: 1px solid #ccc; border-radius: 4px;" />
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-warning btn-sm" id="btnEditarRecorte">
+                                            Volver a recortar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Campo oculto para enviar la imagen recortada en base64 -->
+                                <input type="hidden" id="croppedImageData" name="CroppedImage" />
+
                                 <span asp-validation-for="Team.ImageUrl" class="text-danger"></span>
                             </div>
+
+
                             <div class="mb-3">
                                 <label for="Coach" class="form-label fw-bold">Coach</label>
                                 <div class="input-group">
@@ -83,3 +123,115 @@
         </div>
     </div>
 </div>
+
+
+<!-- Cropper.js CSS y JS -->
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+    let cropper;
+    let originalImageDataURL;
+
+    const fileInput = document.getElementById('subidaArchivo');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const cropButton = document.getElementById('cropButton');
+    const croppedImageData = document.getElementById('croppedImageData');
+    const aspectRatioSelector = document.getElementById('aspectRatioSelector');
+    const croppedPreviewContainer = document.getElementById('croppedPreviewContainer');
+    const croppedPreview = document.getElementById('croppedPreview');
+    const btnEditarRecorte = document.getElementById('btnEditarRecorte');
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("subidaArchivo");
+        const existingImageContainer = document.getElementById("existingImageContainer");
+        const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+        const croppedPreviewContainer = document.getElementById("croppedPreviewContainer");
+
+        let cropper = null;
+
+        fileInput.addEventListener("change", function (e) {
+            if (e.target.files && e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    // Hide existing image preview
+                    existingImageContainer.style.display = "none";
+
+                    // Show cropper UI
+                    imagePreviewContainer.style.display = "block";
+                    croppedPreviewContainer.style.display = "none";
+
+                    const imagePreview = document.getElementById("imagePreview");
+                    imagePreview.src = event.target.result;
+
+                    // Destroy previous cropper instance if any
+                    if (cropper) cropper.destroy();
+
+                    cropper = new Cropper(imagePreview, {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                    });
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                // No file selected: show existing preview again and hide cropper UI
+                existingImageContainer.style.display = "block";
+                imagePreviewContainer.style.display = "none";
+                croppedPreviewContainer.style.display = "none";
+
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }
+        });
+
+        document.getElementById("cropButton").addEventListener("click", () => {
+            if (!cropper) return alert("Por favor, selecciona una imagen primero.");
+
+            const canvas = cropper.getCroppedCanvas({
+                maxWidth: 800,
+                maxHeight: 800,
+            });
+
+            if (canvas) {
+                const croppedImageDataUrl = canvas.toDataURL("image/jpeg");
+
+                // Set the cropped preview
+                const croppedPreview = document.getElementById("croppedPreview");
+                croppedPreview.src = croppedImageDataUrl;
+
+                // Hide cropper, show cropped preview
+                imagePreviewContainer.style.display = "none";
+                croppedPreviewContainer.style.display = "block";
+
+                // Set hidden input for form submit
+                document.getElementById("croppedImageData").value = croppedImageDataUrl;
+            }
+        });
+
+        document.getElementById("btnEditarRecorte").addEventListener("click", () => {
+            // Show cropper UI again for recropping
+            croppedPreviewContainer.style.display = "none";
+            imagePreviewContainer.style.display = "block";
+
+            // Re-create cropper on croppedPreview image source
+            const imagePreview = document.getElementById("imagePreview");
+            imagePreview.src = document.getElementById("croppedPreview").src;
+
+            if (cropper) cropper.destroy();
+
+            cropper = new Cropper(imagePreview, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+        });
+    });
+
+</script>

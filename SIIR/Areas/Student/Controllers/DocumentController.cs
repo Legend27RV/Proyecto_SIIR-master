@@ -271,7 +271,7 @@ namespace SIIR.Areas.Student.Controllers
                     _ => "application/octet-stream"
                 };
 
-                var timestamp = DateTime.Now;
+                var timestamp = DateTime.UtcNow;
                 var downloadFileName = this.GenerateFileName(document.DocumentCatalog.Name, student.ControlNumber);
                 //var downloadFileName = $"{document.DocumentCatalog.Name}_{student.Id}_{timestamp:yyyyMMdd_HHmmss}{extension}";
 

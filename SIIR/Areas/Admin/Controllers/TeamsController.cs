@@ -153,11 +153,12 @@ namespace SIIR.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public IActionResult Edit(TeamVM teamVM)
-        {
+        public IActionResult Edit(TeamVM teamVM, string CroppedImage)
+        {   
             // Remover la validación de la imagen si no se selecciona una nueva imagen
             ModelState.Remove("Team.ImageUrl");
             ModelState.Remove("Team.Name");
+            /*
             if (ModelState.IsValid)
             {
                 var teamFromDb = _contenedorTrabajo.Team.GetById(teamVM.Team.Id);
@@ -185,7 +186,7 @@ namespace SIIR.Areas.Admin.Controllers
 
                 string webRootPath = _hostingEnvironment.WebRootPath;
                 var files = HttpContext.Request.Form.Files;
-                
+
 
                 if (files.Count > 0)
                 {
@@ -220,6 +221,80 @@ namespace SIIR.Areas.Admin.Controllers
                 }
 
                 _contenedorTrabajo.Team.Update(teamVM.Team);
+                _contenedorTrabajo.Save();
+                return RedirectToAction(nameof(Index));
+            }
+            */
+            
+            if (ModelState.IsValid)
+            {
+                string webRootPath = _hostingEnvironment.WebRootPath;
+                var teamFromDb = _contenedorTrabajo.Team.GetById(teamVM.Team.Id);
+
+                teamVM.Team.Representative = _contenedorTrabajo.Representative.GetById(teamVM.Team.RepresentativeId);
+
+                // Generar el nombre del equipo
+                teamVM.Team.Name = teamVM.Team.Category.ToLower() == "mixto"
+                    ? teamVM.Team.Representative.Name
+                    : teamVM.Team.Representative.Name + " " + teamVM.Team.Category;
+
+                // Verificar nombre duplicado
+                if (teamFromDb.Name != teamVM.Team.Name)
+                {
+                    var existingTeam = _contenedorTrabajo.Team.GetFirstOrDefault(t => t.Name == teamVM.Team.Name);
+                    if (existingTeam != null)
+                    {
+                        ModelState.AddModelError("Team.RepresentativeId", $"El equipo {teamVM.Team.Name} ya existe");
+                        teamVM.RepresentativeList = _contenedorTrabajo.Representative.GetRepresentativesList();
+                        teamVM.CoachList = _contenedorTrabajo.Coach.GetCoachesList();
+                        return View(teamVM);
+                    }
+                }
+
+                // Si se recibió imagen recortada nueva
+                if (!string.IsNullOrEmpty(CroppedImage))
+                {
+                    try
+                    {
+                        string fileName = Guid.NewGuid().ToString() + ".jpg";
+                        var uploads = Path.Combine(webRootPath, @"images\teams");
+
+                        // Crear carpeta si no existe
+                        if (!Directory.Exists(uploads))
+                            Directory.CreateDirectory(uploads);
+
+                        // Eliminar imagen anterior
+                        if (!string.IsNullOrEmpty(teamFromDb.ImageUrl))
+                        {
+                            var oldImagePath = Path.Combine(webRootPath, teamFromDb.ImageUrl.TrimStart('\\'));
+                            if (System.IO.File.Exists(oldImagePath))
+                                System.IO.File.Delete(oldImagePath);
+                        }
+
+                        // Guardar nueva imagen
+                        var base64 = CroppedImage.Substring(CroppedImage.IndexOf(",") + 1);
+                        var bytes = Convert.FromBase64String(base64);
+                        var newImagePath = Path.Combine(uploads, fileName);
+                        System.IO.File.WriteAllBytes(newImagePath, bytes);
+
+                        teamFromDb.ImageUrl = @"\images\teams\" + fileName;
+                    }
+                    catch (FormatException)
+                    {
+                        ModelState.AddModelError("Team.ImageUrl", "El formato de la imagen recortada no es válido.");
+                        teamVM.RepresentativeList = _contenedorTrabajo.Representative.GetRepresentativesList();
+                        teamVM.CoachList = _contenedorTrabajo.Coach.GetCoachesList();
+                        return View(teamVM);
+                    }
+                }
+
+                // Actualizar otros campos (excepto la imagen si no se cambió)
+                teamFromDb.Name = teamVM.Team.Name;
+                teamFromDb.Category = teamVM.Team.Category;
+                teamFromDb.RepresentativeId = teamVM.Team.RepresentativeId;
+                teamFromDb.CoachId = teamVM.Team.CoachId;
+
+                _contenedorTrabajo.Team.Update(teamFromDb);
                 _contenedorTrabajo.Save();
                 return RedirectToAction(nameof(Index));
             }

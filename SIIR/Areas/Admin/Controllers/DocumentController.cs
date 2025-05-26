@@ -174,7 +174,7 @@ namespace SIIR.Areas.Admin.Controllers
                     Message = $"Tu documento '{document.DocumentCatalog.Name}' ha sido rechazado. Razón: {rejectionReason}",
                     Type = "DocumentRejected",
                     IsRead = false,
-                    CreatedAt = DateTime.Now.AddHours(-6),
+                    CreatedAt = DateTime.UtcNow.AddHours(-6),
                     DocumentId = document.Id
                 };
 

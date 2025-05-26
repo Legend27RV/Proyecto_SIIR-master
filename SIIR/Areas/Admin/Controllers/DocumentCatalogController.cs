@@ -157,7 +157,7 @@ namespace SIIR.Areas.Admin.Controllers
                                 Message = $"El documento '{documentoCatalogo.Name}' debe actualizarse/refrendarse, favor de subir nuevamente el documento",
                                 Type = "DocumentRefrendo",
                                 IsRead = false,
-                                CreatedAt = DateTime.Now.AddHours(-6),
+                                CreatedAt = DateTime.UtcNow.AddHours(-6),
                                 DocumentId = documentoExistente.Id
                             };
 

@@ -49,6 +49,14 @@ builder.Services.AddSession(options =>
 	options.Cookie.IsEssential = true;
 });
 
+// Default Lockout settings.
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+});
+
 // authentication must be done using cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {

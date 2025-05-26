@@ -22,7 +22,7 @@ namespace SIIR.DataAccess.Data.Repository
         public void LockUser(string userId)
         {
             var userFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
-            userFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
+            userFromDb.LockoutEnd = DateTimeOffset.UtcNow.AddYears(1000);
             _db.SaveChanges();
         }
 

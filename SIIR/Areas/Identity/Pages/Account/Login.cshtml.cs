@@ -153,7 +153,7 @@ namespace SIIR.Areas.Identity.Pages.Account
                                                                     Input.Password,
                                                                     Input.RememberMe,
                                                                     lockoutOnFailure: true); // La cuenta se bloquea despues de varios try
-
+                //aqui hay que cambiar para cambiar los tiempos de bloqueo para las cuentas
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in successfully.");
@@ -163,7 +163,7 @@ namespace SIIR.Areas.Identity.Pages.Account
 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("Esta cuenta ha sido bloqueada, por favor contacte al Administrador");
+                    _logger.LogWarning("Intentos de inicio de sesión excedieron los permitidos, por favor intente otra vez mas tarde");
                     return RedirectToPage("./Lockout");
                 }
                 else
